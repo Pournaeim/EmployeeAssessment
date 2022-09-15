@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.Employee;
 
 using System;
 using System.Collections.Generic;
@@ -6,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Employee
+namespace DataAccess.IRepositories
 {
-    public interface IEmployeeRepository : IRepository<Employee>
+    public interface IEmployeeRepository : IGenericRepository<Employee>
     {
     }
 }

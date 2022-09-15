@@ -1,7 +1,7 @@
 ﻿using ApplicationServices.Models;
 
 using Domain.Employee;
-
+using Domain.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +27,7 @@ namespace ApplicationServices.Services
                 LastName = employeeDto.LastName,
             };
 
-            _employeeRepository.Create(employee);
+            _employeeRepository.Add(employee);
             _employeeRepository.SaveChanges();
 
             return employee.Id;
@@ -87,7 +87,7 @@ namespace ApplicationServices.Services
                 LastName = employeeDto.LastName,
             };
 
-            _employeeRepository.Update(employee);
+            _employeeRepository.Upsert(employee);
 
         }
         public void SaveChanges()
