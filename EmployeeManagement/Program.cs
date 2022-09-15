@@ -1,9 +1,9 @@
 using ApplicationServices.Services;
 
 using DataAccess.Common;
-using DataAccess.IConfiguration;
+using Domain.IRepositories;
 
-using DataLayer.SqlServer.Repositories;
+using DataLayer.Repositories;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -19,11 +19,9 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("EmployeeConnectionString");
 builder.Services.AddDbContext<ApplicationDbContext>(option => option.UseSqlServer(connectionString));
 
-//Adding the unit of work to DI container
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-//We can use DI Tools such as Castel, ...
+//We can use DI Tools such as Castel to add Repoeitories to DI container, ...
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-builder.Services.AddScoped<EmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 var app = builder.Build();
 

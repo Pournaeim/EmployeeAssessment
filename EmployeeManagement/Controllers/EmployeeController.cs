@@ -1,11 +1,7 @@
-﻿using ApplicationServices.Models;
+﻿
+using ApplicationServices.Models;
 using ApplicationServices.Services;
 
-using DataAccess.IConfiguration;
-
-using Domain.Employee;
-
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManagement.Controllers
@@ -14,27 +10,77 @@ namespace EmployeeManagement.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<EmployeeController> _logger;
-        public EmployeeController(
-            IUnitOfWork unitOfWork,
-            ILogger<EmployeeController> logger)
+        private readonly IEmployeeService _employeeService;
+
+        public EmployeeController(IEmployeeService employeeService)
         {
-            _unitOfWork = unitOfWork;
-            _logger = logger;
+            _employeeService = employeeService;
         }
+
         [HttpPost]
-        public async Task<IActionResult> CreateEmployee(Employee employee)
+        public IActionResult CreateEmployee(EmployeeDto employeeDto)
         {
             if (ModelState.IsValid)
             {
-                await _unitOfWork.Employees.Add(employee);
-                await _unitOfWork.CompleteAsync();
+                _employeeService.AddNew(employeeDto);
 
-                return new JsonResult(employee)
+                return new JsonResult(employeeDto)
                 {
                     StatusCode = 200
                 };
+            }
+
+            return new JsonResult("Somthing went wrong")
+            {
+                StatusCode = 500
+            };
+        }
+
+        [HttpPost]
+        public IActionResult UpdateEmployee(EmployeeDto employeeDto)
+        {
+            if (ModelState.IsValid)
+            {
+                _employeeService.Update(employeeDto);
+
+                return new JsonResult(employeeDto)
+                {
+                    StatusCode = 200
+                };
+            }
+
+            return new JsonResult("Somthing went wrong")
+            {
+                StatusCode = 500
+            };
+        }
+        [HttpGet]
+        public IActionResult GetEmployee(int id)
+        {
+            var employeeDto = _employeeService.Get(id);
+
+            if (employeeDto == null)
+            {
+                return new JsonResult(employeeDto)
+                {
+                    StatusCode = 200
+                };
+            }
+
+            return new JsonResult("Somthing went wrong")
+            {
+                StatusCode = 500
+            };
+        }
+
+        [HttpPost]
+        public IActionResult DeleteEmployee(EmployeeDto employeeDto)
+        {
+            if (ModelState.IsValid)
+            {
+                _employeeService.Remove(employeeDto);
+
+                return Ok();
             }
 
             return new JsonResult("Somthing went wrong")

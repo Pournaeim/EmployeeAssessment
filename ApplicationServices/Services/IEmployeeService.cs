@@ -15,11 +15,9 @@ namespace ApplicationServices.Services
     {
         int AddNew(EmployeeDto entity);
         EmployeeDto Get(int id);
-        IEnumerable<EmployeeDto> Get(Expression<Func<EmployeeDto, bool>> predicate);
         IEnumerable<EmployeeDto> GetAll();
-        void Update(EmployeeDto entity);
-        void Remove(int id);
-        void SaveChanges();
+        bool Update(EmployeeDto entity);
+        bool Remove(EmployeeDto entity);
 
     }
 }

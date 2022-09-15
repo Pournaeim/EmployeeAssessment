@@ -1,22 +1,20 @@
-﻿using ApplicationServices.Models;
-
-using Domain.Employee;
+﻿
+using ApplicationServices.Models;
 using Domain.IRepositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.Employee;
+using Microsoft.Extensions.Logging;
 
 namespace ApplicationServices.Services
 {
     public class EmployeeService : IEmployeeService
     {
         private readonly IEmployeeRepository _employeeRepository;
-        public EmployeeService(IEmployeeRepository employeeRepository)
+        protected readonly ILogger _logger;
+
+        public EmployeeService(IEmployeeRepository employeeRepository, ILogger logger)
         {
             _employeeRepository = employeeRepository;
+            this._logger = logger;
         }
         public int AddNew(EmployeeDto employeeDto)
         {
@@ -28,7 +26,6 @@ namespace ApplicationServices.Services
             };
 
             _employeeRepository.Add(employee);
-            _employeeRepository.SaveChanges();
 
             return employee.Id;
         }
@@ -44,55 +41,76 @@ namespace ApplicationServices.Services
                 LastName = employee.LastName,
 
             };
-            employeeDto.Id = id;
 
             return employeeDto;
         }
 
-        public IEnumerable<EmployeeDto> Get(Expression<Func<EmployeeDto, bool>> predicate)
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<EmployeeDto> GetAll()
         {
-            var employeeList = _employeeRepository.GetAll();
-            var employeeDtoList = from e in employeeList
-                                  select new EmployeeDto
-                                  {
-                                      Id = e.Id,
-                                      FirstName = e.FirstName,
-                                      LastName = e.LastName,
-                                      MiddleName = e.MiddleName,
-                                  };
 
-            return employeeDtoList;
-        }
-
-        public void Remove(int id)
-        {
-            var employee = _employeeRepository.Get(id);
-
-            _employeeRepository.Delete(employee);
-        }
-
-
-        public void Update(EmployeeDto employeeDto)
-        {
-            var employee = new Employee()
+            try
             {
-                Id = employeeDto.Id,
-                FirstName = employeeDto.FirstName,
-                MiddleName = employeeDto.MiddleName,
-                LastName = employeeDto.LastName,
-            };
+                var employeeList = _employeeRepository.GetAll();
+                var employeeDtoList = from e in employeeList
+                                      select new EmployeeDto
+                                      {
+                                          Id = e.Id,
+                                          FirstName = e.FirstName,
+                                          LastName = e.LastName,
+                                          MiddleName = e.MiddleName,
+                                      };
 
-            _employeeRepository.Upsert(employee);
+                return employeeDtoList;
+            }
+            catch (Exception ex)
+            {
 
+                _logger.LogError(ex, "{Repo} All method error", typeof(EmployeeService));
+                return new List<EmployeeDto>();
+            }
         }
-        public void SaveChanges()
+
+
+
+        public bool Remove(EmployeeDto entity)
         {
-            _employeeRepository.SaveChanges();
+
+
+            try
+            {
+                var removableEntity = _employeeRepository.Get(entity.Id);
+                _employeeRepository.Delete(removableEntity);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Repo} Delete method error", typeof(EmployeeService));
+                return false;
+            }
+        }
+
+        public bool Update(EmployeeDto employeeDto)
+        {
+            try
+            {
+                var employee = new Employee()
+                {
+                    Id = employeeDto.Id,
+                    FirstName = employeeDto.FirstName,
+                    MiddleName = employeeDto.MiddleName,
+                    LastName = employeeDto.LastName,
+                };
+
+                _employeeRepository.Upsert(employee);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, "{Repo} Upsert method error", typeof(EmployeeService));
+                return false;
+            }
         }
     }
 }
